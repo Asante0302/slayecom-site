@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connexion TikTok — redirection...</title>
+<style>
+  body {
+    font: 16px/1.6 -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    max-width: 520px; margin: 80px auto; padding: 0 20px; color: #1a1a1a;
+    text-align: center;
+  }
+  h1 { font-size: 22px; }
+  .btn {
+    display: inline-block; margin-top: 20px; padding: 12px 22px;
+    background: #fe2c55; color: #fff; text-decoration: none;
+    border-radius: 9px; font-weight: 600;
+  }
+  code {
+    display: block; margin-top: 18px; padding: 10px; background: #f4f4f6;
+    border-radius: 8px; font-size: 12px; word-break: break-all; text-align: left;
+  }
+  .hint { color: #666; font-size: 14px; margin-top: 24px; }
+  .error { color: #c0392b; }
+</style>
+</head>
+<body>
+  <div id="app">
+    <h1>Connexion à ton outil local…</h1>
+    <p>Redirection automatique vers TikTok Auto Poster sur ta machine.</p>
+    <p class="hint">Si rien ne se passe dans quelques secondes, assure-toi que
+    l'outil est bien lancé (<code style="display:inline;padding:2px 6px">start.bat</code>
+    ouvert), puis clique ci-dessous :</p>
+    <a id="manual-link" class="btn" href="#">Ouvrir TikTok Auto Poster</a>
+  </div>
+
+  <script>
+    // Cette page ne fait que relayer les paramètres reçus de TikTok
+    // (code, state, ou error) vers l'application locale, qui tourne sur
+    // 127.0.0.1 et ne peut donc pas être déclarée directement chez TikTok
+    // (TikTok exige une URL de redirection en https://).
+    var LOCAL_TARGET = "http://127.0.0.1:8000/oauth/callback";
+    var query = window.location.search || "";
+    var target = LOCAL_TARGET + query;
+
+    document.getElementById("manual-link").href = target;
+
+    var params = new URLSearchParams(query);
+    if (params.get("error")) {
+      document.getElementById("app").innerHTML =
+        '<h1 class="error">TikTok a refusé la connexion</h1>' +
+        '<p>' + (params.get("error_description") || params.get("error")) + '</p>' +
+        '<a class="btn" href="' + target + '">Retourner sur le tableau de bord</a>';
+    } else if (params.get("code")) {
+      // Redirection automatique immédiate.
+      window.location.replace(target);
+    } else {
+      document.getElementById("app").innerHTML =
+        '<h1 class="error">Aucun code reçu</h1>' +
+        '<p>Cette page doit être ouverte uniquement via la redirection TikTok.</p>';
+    }
+  </script>
+</body>
+</html>
